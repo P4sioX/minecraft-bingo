@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Moje Minecraft Bingo</title>
+    <style>
+        
+        body {
+            font-family: 'Minecraft', sans-serif;
+            background-color: #333;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('tlo1.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: rgba(34, 34, 34, 0.9);
+            padding: 15px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #fff;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #groupNameDisplay {
+            font-size: 1.2em;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 5px;
+            width: 100%;
+            max-width: 700px;
+            aspect-ratio: 1 / 1;
+            border: 4px solid #555;
+            background-color: rgba(68, 68, 68, 0.8);
+            padding: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .bingo-cell {
+            background-color: rgba(42, 42, 42, 0.9);
+            border: 2px solid #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #ddd;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-sizing: border-box;
+            user-select: none;
+            word-wrap: break-word;
+            line-height: 1.2;
+        }
+
+        .bingo-cell:hover {
+            background-color: rgba(58, 58, 58, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .bingo-cell.marked {
+            background-color: rgba(26, 109, 26, 0.9);
+            border-color: #4CAF50;
+            color: #fff;
+        }
+
+        footer {
+            background-color: rgba(34, 34, 34, 0.9);
+            padding: 8px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.7em;
+            color: #aaa;
+            margin-top: 15px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+      
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.6em;
+                letter-spacing: 1px;
+            }
+            #groupNameDisplay {
+                font-size: 1em;
+            }
+            .bingo-grid {
+                max-width: 90%;
+                gap: 4px;
+                padding: 4px;
+            }
+            .bingo-cell {
+                font-size: 0.8em;
+                padding: 6px;
+            }
+            main {
+                padding: 10px;
+            }
+            header, footer {
+                padding: 10px;
+                margin-bottom: 10px;
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.3em;
+            }
+            #groupNameDisplay {
+                font-size: 0.9em;
+            }
+            .bingo-grid {
+                max-width: 98%;
+                gap: 3px;
+                padding: 3px;
+            }
+            .bingo-cell {
+                font-size: 0.65em;
+                padding: 4px;
+            }
+            main {
+                padding: 5px;
+            }
+            header, footer {
+                padding: 8px;
+                margin-bottom: 8px;
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MOJE MINECRAFT BINGO</h1>
+        <div id="groupNameDisplay"></div>
+    </header>
+
+    <main>
+        <div class="bingo-grid" id="bingoGrid">
+            </div>
+    </main>
+
+    <footer>
+        <p>Seed: Niestandardowy | Poziom Trudności: Kontrolowany | Wersja: Twoja Edycja</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+    apiKey: "AIzaSyAPkoHxtq9PlsMpG1T1TKbH5Wqr54UWse8",
+    authDomain: "p4si0x.firebaseapp.com",
+    projectId: "p4si0x",
+    storageBucket: "p4si0x.firebasestorage.app",
+    messagingSenderId: "1098386195548",
+    appId: "1:1098386195548:web:b3c552c82fce01679b9299",
+    measurementId: "G-8Q9R8YJV1N"
+  };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const bingoGrid = document.getElementById('bingoGrid');
+            const groupNameDisplay = document.getElementById('groupNameDisplay');
+            const pageTitle = document.getElementById('pageTitle');
+            const urlParams = new URLSearchParams(window.location.search);
+            const groupName = urlParams.get('group') || 'default';
+            const bingoDocRef = doc(db, 'bingoBoards', groupName); // Referencja do dokumentu Firestore dla tej grupy
+
+            groupNameDisplay.textContent = `Grupa: ${groupName}`;
+            pageTitle.textContent = `Minecraft Bingo - ${groupName}`;
+
+            const bingoItems = [
+                "1-idea",
+                "2-idea",
+                "3-idea",
+                "4-idea",
+                "5-idea",
+                "6-idea",
+                "7-idea",
+                "8-idea",
+                "9-idea",
+                "10-idea",
+                "11-idea",
+                "12-idea",
+                "13-idea",
+                "14-idea",
+                "15-idea",
+                "16-idea",
+                "17-idea",
+                "18-idea",
+                "19-idea",
+                "20-idea",
+                "21-idea",
+                "22-idea",
+                "23-idea",
+                "24-idea",
+                "25-idea"
+            ];
+            let currentMarkedState = new Array(bingoItems.length).fill(false);
+            const cells = []; 
+
+            function createBingoBoard(initialState) {
+                bingoGrid.innerHTML = ''; 
+                cells.length = 0;
+                bingoItems.forEach((itemText, index) => {
+                    const cell = document.createElement('div');
+                    cell.classList.add('bingo-cell');
+                    cell.textContent = itemText;
+                    cell.dataset.index = index; 
+
+                    if (initialState && initialState[index]) {
+                        cell.classList.add('marked');
+                    }
+                    
+                    cell.addEventListener('click', async () => {
+                        const clickedIndex = parseInt(cell.dataset.index);
+                        const isMarked = cell.classList.contains('marked');
+                        
+                        currentMarkedState[clickedIndex] = !isMarked;
+
+                        try {
+                            const updateObject = {};
+                            updateObject[`${clickedIndex}`] = !isMarked; 
+                            await setDoc(bingoDocRef, { markedCells: updateObject }, { merge: true });
+                            console.log("Stan pola zaktualizowany w Firestore.");
+
+                        } catch (e) {
+                            console.error("Błąd podczas aktualizacji Firestore: ", e);
+                            currentMarkedState[clickedIndex] = isMarked; 
+                            cell.classList.toggle('marked');
+                        }
+                    });
+                    bingoGrid.appendChild(cell);
+                    cells.push(cell); 
+                });
+            }
+
+            onSnapshot(bingoDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data && data.markedCells) {
+                        const fetchedMarkedState = new Array(bingoItems.length).fill(false);
+                        for (const key in data.markedCells) {
+                            if (Object.prototype.hasOwnProperty.call(data.markedCells, key)) {
+                                fetchedMarkedState[parseInt(key)] = data.markedCells[key];
+                            }
+                        }
+                        currentMarkedState = fetchedMarkedState; // Zaktualizuj globalny stan
+
+                        cells.forEach((cell, index) => {
+                            if (currentMarkedState[index]) {
+                                cell.classList.add('marked');
+                            } else {
+                                cell.classList.remove('marked');
+                            }
+                        });
+                        console.log("Plansza zaktualizowana na podstawie Firestore.");
+                    }
+                } else {
+                    console.log("Dokument dla tej grupy nie istnieje, tworzę początkowy stan.");
+                    createBingoBoard();
+                }
+            }, (error) => {
+                console.error("Błąd nasłuchiwania Firestore: ", error);
+            });
+
+            createBingoBoard(currentMarkedState);
+        });
+    </script>
+</body>
+</html>
