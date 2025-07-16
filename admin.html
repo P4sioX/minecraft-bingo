@@ -6,7 +6,7 @@
     <title>Minecraft Bingo - Panel Admina</title>
     <style>
         body {
-            font-family: 'Minecraft', sans-serif; /* Pamiętaj, aby mieć tę czcionkę zdefiniowaną lub usunąć */
+            font-family: 'Minecraft', sans-serif;
             background-color: #333;
             color: #eee;
             margin: 0;
@@ -15,7 +15,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            background-image: url('tlo1.png'); /* Upewnij się, że ten plik istnieje w katalogu */
+            background-image: url('tlo1.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -81,7 +81,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 1001;
-            display: none; /* Domyślnie ukryte */
+            display: none;
             flex-direction: column;
             gap: 15px;
             max-width: 400px;
@@ -154,7 +154,7 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Zmienione na flex-start, aby formularz był na górze */
+            justify-content: flex-start;
             align-items: center;
             width: 100%;
             padding: 15px;
@@ -168,12 +168,12 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 700px; /* Dopasuj do szerokości planszy */
+            max-width: 700px; 
             box-sizing: border-box;
-            display: none; /* Domyślnie ukryte */
-            flex-direction: column; /* Elementy w kolumnie */
-            gap: 15px; /* Odstęp między elementami */
-            align-items: center; /* Centruj zawartość formularza */
+            display: none; 
+            flex-direction: column; 
+            gap: 15px; 
+            align-items: center;
         }
 
         .admin-controls label {
@@ -182,22 +182,22 @@
             font-weight: bold;
             color: #fff;
             text-align: left;
-            width: 100%; /* Rozciągnij na całą szerokość */
+            width: 100%; 
         }
 
         .admin-controls input[type="text"] {
-            width: calc(100% - 20px); /* Szerokość z paddingiem */
+            width: calc(100% - 20px); 
             padding: 10px;
             border: 1px solid #555;
             background-color: #2a2a2a;
             color: #eee;
             border-radius: 5px;
             font-size: 1em;
-            box-sizing: border-box; /* Ważne dla paddingu i szerokości */
+            box-sizing: border-box; 
         }
 
         .admin-controls button {
-            background-color: #337ab7; /* Kolor przycisku administratora */
+            background-color: #337ab7;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -205,7 +205,7 @@
             cursor: pointer;
             font-size: 1em;
             transition: background-color 0.3s ease;
-            margin-top: 10px; /* Odstęp po inputach */
+            margin-top: 10px; 
         }
 
         .admin-controls button:hover {
@@ -223,11 +223,11 @@
             border-radius: 5px;
             font-size: 0.9em;
             box-sizing: border-box;
-            word-wrap: break-word; /* Dodałem to, aby długi tekst się łamał */
+            word-wrap: break-word; 
         }
 
         #currentItemsList ol {
-            list-style-type: decimal; /* Numeryczna lista */
+            list-style-type: decimal; 
             padding-left: 20px;
             margin: 0;
         }
@@ -250,7 +250,7 @@
             cursor: pointer;
             font-size: 0.8em;
             transition: background-color 0.2s ease;
-            flex-shrink: 0; /* Zapobiega zmniejszaniu się przycisku */
+            flex-shrink: 0; 
         }
         .remove-item-btn:hover {
             background-color: #c82333;
@@ -264,7 +264,7 @@
             width: 100%;
             max-width: 700px;
             box-sizing: border-box;
-            display: none; /* Domyślnie ukryte, pokażemy adminowi */
+            display: none; 
             flex-direction: column;
             gap: 10px;
             align-items: center;
@@ -283,7 +283,7 @@
         }
 
         .reset-group-section button {
-            background-color: #ffc107; /* Ostrzegawczy żółty */
+            background-color: #ffc107; 
             color: #333;
             padding: 10px 20px;
             border: none;
@@ -296,7 +296,6 @@
             background-color: #e0a800;
         }
 
-        /* Responsywność */
         @media (max-width: 768px) {
             .admin-controls, .reset-group-section {
                 padding: 15px;
@@ -387,16 +386,11 @@
 
     </main>
 
-    <footer>
-        <p>Seed: Niestandardowy | Poziom Trudności: Kontrolowany | Wersja: Twoja Edycja</p>
-    </footer>
-
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
         import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
 
-        // --------------- TUTAJ WKLEJ SWOJĄ firebaseConfig Z KONSOLI FIREBASE ---------------
         const firebaseConfig = {
             apiKey: "AIzaSyAPkoHxtq9PlsMpG1T1TKbH5Wqr54UWse8",
             authDomain: "p4si0x.firebaseapp.com",
@@ -406,32 +400,27 @@
             appId: "1:1098386195548:web:b3c552c82fce01679b9299",
             measurementId: "G-8Q9R8YJV1N"
         };
-        // ----------------------------------------------------------------------------------
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Referencja do dokumentu z globalnymi ustawieniami/elementami bingo (lista zadań)
         const bingoItemsDocRef = doc(db, 'bingoSettings', 'items');
 
         let bingoItems = [];
         const MAX_BINGO_ITEMS = 25;
 
-        // ZMIENNA DLA UID ADMINISTRATORA (ZAMIEŃ NA SWÓJ UID Z KONSOLI FIREBASE AUTH)
-        const ADMIN_UID = 'twój_uid_administratora_tutaj'; // <-- BARDZO WAŻNE: ZMIEŃ TO NA SWÓJ RZECZYWISTY UID!
+        const ADMIN_UID = '8iLju2pBlDT24IcBT0GQb7hbjjJ2'; 
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Elementy formularza administracyjnego
+           
             const adminControls = document.getElementById('adminControls');
             const newItemText = document.getElementById('newItemText');
             const newAltText = document.getElementById('newAltText');
             const addItemBtn = document.getElementById('addItemBtn');
             const currentItemsList = document.getElementById('currentItemsList').querySelector('ol');
             const itemCountSpan = document.getElementById('itemCount');
-            const updateItemsBtn = document.getElementById('updateItemsBtn'); // Zmieniona nazwa przycisku
-
-            // Elementy formularza logowania
+            const updateItemsBtn = document.getElementById('updateItemsBtn');
             const loginStatusSpan = document.getElementById('loginStatus');
             const loginBtn = document.getElementById('loginBtn');
             const logoutBtn = document.getElementById('logoutBtn');
@@ -442,14 +431,10 @@
             const signInBtn = document.getElementById('signInBtn');
             const loginError = document.getElementById('loginError');
             const overlay = document.getElementById('overlay');
-
-            // Elementy resetowania grupy
             const resetGroupSection = document.getElementById('resetGroupSection');
             const resetGroupNameInput = document.getElementById('resetGroupName');
             const resetGroupBtn = document.getElementById('resetGroupBtn');
 
-
-            // Funkcja do renderowania listy zadań w formularzu admina
             function renderAdminItemsList() {
                 currentItemsList.innerHTML = '';
                 itemCountSpan.textContent = bingoItems.length;
@@ -472,7 +457,6 @@
                 });
             }
 
-            // Nasłuchiwanie na zmiany w dokumencie bingoSettings/items (lista zadań)
             onSnapshot(bingoItemsDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -491,15 +475,12 @@
                 } else {
                     bingoItems = [];
                     console.log("Dokument bingoSettings/items nie istnieje, tworzę.");
-                    // Możesz odkomentować to, jeśli chcesz, aby dokument był zawsze tworzony, nawet jeśli nikt nie kliknie "Zapisz zadania"
-                    // setDoc(bingoItemsDocRef, { items: [] });
                 }
                 renderAdminItemsList();
             }, (error) => {
                 console.error("Błąd nasłuchiwania na bingoSettings/items: ", error);
             });
 
-            // Dodawanie nowego zadania do lokalnej tablicy
             addItemBtn.addEventListener('click', () => {
                 const mainText = newItemText.value.trim();
                 const altText = newAltText.value.trim();
@@ -517,7 +498,6 @@
                 }
             });
 
-            // Zapisywanie zmian w zadaniach do Firestore
             updateItemsBtn.addEventListener('click', async () => {
                 if (bingoItems.length !== MAX_BINGO_ITEMS) {
                     const confirmUpdate = confirm(`Masz ${bingoItems.length} zadań. Plansza bingo wymaga ${MAX_BINGO_ITEMS} zadań. Czy na pewno chcesz zapisać?`);
@@ -536,7 +516,6 @@
                 }
             });
 
-            // Obsługa resetowania planszy dla konkretnej grupy
             resetGroupBtn.addEventListener('click', async () => {
                 const groupToReset = resetGroupNameInput.value.trim();
                 if (!groupToReset) {
@@ -560,36 +539,31 @@
             });
 
 
-            // --- LOGIKA UWIERZYTELNIANIA ---
-
-            // Monitoruj stan uwierzytelnienia
             onAuthStateChanged(auth, (user) => {
                 if (user && user.uid === ADMIN_UID) {
                     loginStatusSpan.textContent = `Zalogowany jako admin: ${user.email}`;
                     loginBtn.style.display = 'none';
                     logoutBtn.style.display = 'inline-block';
-                    adminControls.style.display = 'flex'; // Pokaż formularz admina
-                    resetGroupSection.style.display = 'flex'; // Pokaż sekcję resetowania
+                    adminControls.style.display = 'flex'; 
+                    resetGroupSection.style.display = 'flex'; 
                 } else {
                     loginStatusSpan.textContent = 'Niezalogowany';
                     loginBtn.style.display = 'inline-block';
                     logoutBtn.style.display = 'none';
-                    adminControls.style.display = 'none'; // Ukryj formularz admina
-                    resetGroupSection.style.display = 'none'; // Ukryj sekcję resetowania
+                    adminControls.style.display = 'none'; 
+                    resetGroupSection.style.display = 'none'; 
                 }
-                hideLoginForm(); // Zawsze ukryj formularz logowania po zmianie stanu
+                hideLoginForm(); 
             });
 
-            // Pokaż formularz logowania
             loginBtn.addEventListener('click', () => {
                 loginFormContainer.style.display = 'flex';
                 overlay.style.display = 'block';
-                loginError.style.display = 'none'; // Ukryj błąd przy ponownym otwarciu
+                loginError.style.display = 'none'; 
             });
 
-            // Zamknij formularz logowania
             closeLoginFormBtn.addEventListener('click', hideLoginForm);
-            overlay.addEventListener('click', hideLoginForm); // Zamknij po kliknięciu poza formularzem
+            overlay.addEventListener('click', hideLoginForm); 
 
             function hideLoginForm() {
                 loginFormContainer.style.display = 'none';
@@ -599,17 +573,15 @@
                 adminPasswordInput.value = '';
             }
 
-            // Obsługa logowania
             signInBtn.addEventListener('click', async () => {
                 const email = adminEmailInput.value;
                 const password = adminPasswordInput.value;
 
-                loginError.style.display = 'none'; // Wyczyść poprzedni błąd
+                loginError.style.display = 'none'; 
 
                 try {
                     await signInWithEmailAndPassword(auth, email, password);
                     console.log("Użytkownik zalogowany!");
-                    // onAuthStateChanged automatycznie zaktualizuje UI
                 } catch (error) {
                     console.error("Błąd logowania:", error.code, error.message);
                     loginError.textContent = "Błąd logowania: " + (error.code === 'auth/invalid-credential' ? 'Nieprawidłowy email lub hasło.' : error.message);
@@ -617,12 +589,10 @@
                 }
             });
 
-            // Obsługa wylogowania
             logoutBtn.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
                     console.log("Użytkownik wylogowany!");
-                    // onAuthStateChanged automatycznie zaktualizuje UI
                 } catch (error) {
                     console.error("Błąd wylogowania:", error);
                     alert("Wystąpił błąd podczas wylogowania.");
