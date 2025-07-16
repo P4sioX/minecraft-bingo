@@ -293,8 +293,18 @@
                         
                         currentMarkedState[clickedIndex] = !isMarked;
 
+                        // Weryfikacja danych przed wysłaniem do Firestore
+                        const dataToSend = {};
+                        for (const key in currentMarkedState) {
+                            const value = currentMarkedState[key];
+                            // Upewnij się, że wysyłane są tylko poprawne wartości boolowskie
+                            if (typeof value === 'boolean') {
+                                dataToSend[key] = value;
+                            }
+                        }
+
                         try {
-                            await setDoc(bingoDocRef, { markedCells: currentMarkedState });
+                            await setDoc(bingoDocRef, { markedCells: dataToSend });
                             console.log("Stan pola zaktualizowany w Firestore.");
                         } catch (e) {
                             console.error("Błąd podczas aktualizacji Firestore: ", e);
