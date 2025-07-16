@@ -204,11 +204,6 @@
     <main>
         <div class="bingo-grid" id="bingoGrid">
         </div>
-        <div style="margin-top: 20px; text-align: center;">
-            <p>Lub wgraj zadania ręcznie:</p>
-            <input type="file" id="uploadJsonInput" accept=".json" style="display: none;">
-            <button onclick="document.getElementById('uploadJsonInput').click();">Wgraj zadania z pliku JSON</button>
-        </div>
     </main>
 
     <div id="winMessage" class="win-message">
@@ -238,7 +233,6 @@
             const pageTitle = document.getElementById('pageTitle');
             const winMessage = document.getElementById('winMessage');
             const resetButton = document.getElementById('resetButton');
-            const uploadJsonInput = document.getElementById('uploadJsonInput');
             const urlParams = new URLSearchParams(window.location.search);
             const groupName = urlParams.get('group') || 'default';
             const bingoDocRef = doc(db, 'bingoBoards', groupName);
@@ -373,29 +367,6 @@
                 }
             }, (error) => {
                 console.error("Błąd nasłuchiwania na bingoSettings/items: ", error);
-            });
-
-            uploadJsonInput.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const parsedItems = JSON.parse(e.target.result);
-                            if (Array.isArray(parsedItems)) {
-                                bingoItems = parsedItems;
-                                console.log("Zadania bingo wgrane z pliku:", bingoItems);
-                                createBingoBoard(bingoItems);
-                            } else {
-                                alert("Wgrany plik nie zawiera poprawnej tablicy zadań.");
-                            }
-                        } catch (error) {
-                            alert("Błąd podczas parsowania pliku JSON.");
-                            console.error("Błąd parsowania:", error);
-                        }
-                    };
-                    reader.readAsText(file);
-                }
             });
 
             resetButton.addEventListener('click', async () => {
