@@ -89,7 +89,6 @@
             user-select: none;
             word-wrap: break-word;
             line-height: 1.2;
-            position: relative;
         }
 
         .bingo-cell:hover {
@@ -101,33 +100,6 @@
             background-color: rgba(26, 109, 26, 0.9);
             border-color: #4CAF50;
             color: #fff;
-        }
-
-        .bingo-cell.free-space {
-            background-color: #555;
-            cursor: default;
-        }
-        
-        .bingo-cell .tooltip-text {
-            visibility: hidden;
-            width: 120px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .bingo-cell:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
         }
 
         .win-message {
@@ -144,7 +116,7 @@
             font-weight: bold;
             z-index: 1000;
             box-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
-            display: none;
+            display: none; 
             border-radius: 10px;
             line-height: 1.5;
             letter-spacing: 1px;
@@ -203,7 +175,7 @@
 
     <main>
         <div class="bingo-grid" id="bingoGrid">
-        </div>
+            </div>
     </main>
 
     <div id="winMessage" class="win-message">
@@ -214,16 +186,16 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
         import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
-
+		
         const firebaseConfig = {
-            apiKey: "AIzaSyAPkoHxtq9PlsMpG1T1TKbH5Wqr54UWse8",
-            authDomain: "p4si0x.firebaseapp.com",
-            projectId: "p4si0x",
-            storageBucket: "p4si0x.firebasestorage.app",
-            messagingSenderId: "1098386195548",
-            appId: "1:1098386195548:web:b3c552c82fce01679b9299",
-            measurementId: "G-8Q9R8YJV1N"
-        };
+			apiKey: "AIzaSyAPkoHxtq9PlsMpG1T1TKbH5Wqr54UWse8",
+			authDomain: "p4si0x.firebaseapp.com",
+			projectId: "p4si0x",
+			storageBucket: "p4si0x.firebasestorage.app",
+			messagingSenderId: "1098386195548",
+			appId: "1:1098386195548:web:b3c552c82fce01679b9299",
+			measurementId: "G-8Q9R8YJV1N"
+};
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -231,148 +203,151 @@
             const bingoGrid = document.getElementById('bingoGrid');
             const groupNameDisplay = document.getElementById('groupNameDisplay');
             const pageTitle = document.getElementById('pageTitle');
-            const winMessage = document.getElementById('winMessage');
-            const resetButton = document.getElementById('resetButton');
+            const winMessage = document.getElementById('winMessage'); 
+            const resetButton = document.getElementById('resetButton'); 
             const urlParams = new URLSearchParams(window.location.search);
             const groupName = urlParams.get('group') || 'default';
-            const bingoDocRef = doc(db, 'bingoBoards', groupName);
+            const bingoDocRef = doc(db, 'bingoBoards', groupName); 
             const bingoItemsDocRef = doc(db, 'bingoSettings', 'items');
-
-            let bingoItems = [];
-            let currentMarkedState = {};
-            const cells = [];
-
+            
             groupNameDisplay.textContent = `Grupa: ${groupName}`;
             pageTitle.textContent = `Minecraft Bingo - ${groupName}`;
 
+            let bingoItems = []; // Pusta tablica, która zostanie wypełniona z Firestor'a
+			
+            let currentMarkedState = new Array(25).fill(false); // Maksymalna liczba zadań to 25
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
             function checkWin() {
-                const markedCount = Object.keys(currentMarkedState).filter(key => currentMarkedState[key]).length;
-                if (markedCount === 25) {
-                    winMessage.style.display = 'block';
+                const allMarked = currentMarkedState.every(isMarked => isMarked === true);
+                if (allMarked) {
+                    winMessage.style.display = 'block'; 
                 } else {
-                    winMessage.style.display = 'none';
+                    winMessage.style.display = 'none'; 
                 }
             }
 
-            function createBingoBoard(items) {
-                if (!Array.isArray(items) || items.length < 24) {
-                    console.error("Niewystarczająca liczba zadań bingo (wymagane 24).");
-                    bingoGrid.innerHTML = '<p style="color:red; text-align:center;">Brak wystarczającej liczby zadań bingo. Skontaktuj się z administratorem.</p>';
+            function createBingoBoard(initialState) {
+                bingoGrid.innerHTML = '';
+                
+                // Sprawdź, czy mamy wystarczająco dużo zadań
+                if (bingoItems.length < 25) {
+                    const errorMessage = "Brak wystarczającej liczby zadań do utworzenia planszy bingo (wymagane 25). Proszę dodać więcej zadań w panelu admina.";
+                    bingoGrid.innerHTML = `<p style="text-align: center; color: red;">${errorMessage}</p>`;
+                    console.error(errorMessage);
                     return;
                 }
-                
-                bingoGrid.innerHTML = '';
-                cells.length = 0;
 
-                const shuffledItems = [...items].sort(() => 0.5 - Math.random());
-
-                for (let i = 0; i < 25; i++) {
+                bingoItems.forEach((itemText, index) => {
                     const cell = document.createElement('div');
                     cell.classList.add('bingo-cell');
-                    const itemObject = i === 12 ? { text: "FREE SPACE", altText: null } : shuffledItems.pop();
+                    cell.textContent = itemText;
+                    cell.dataset.index = index; 
+					
+                    if (initialState && initialState[index]) {
+                        cell.classList.add('marked');
+                    }
                     
-                    if (itemObject) {
-                        const cellText = document.createElement('span');
-                        cellText.textContent = itemObject.text;
-                        cell.appendChild(cellText);
+                    cell.addEventListener('click', async () => {
+                        const clickedIndex = parseInt(cell.dataset.index);
+                        const isMarked = cell.classList.contains('marked');
                         
-                        if (itemObject.altText) {
-                            const tooltip = document.createElement('span');
-                            tooltip.classList.add('tooltip-text');
-                            tooltip.textContent = itemObject.altText;
-                            cell.appendChild(tooltip);
+                        currentMarkedState[clickedIndex] = !isMarked;
+
+                        try {
+                            const updateObject = {};
+                            updateObject[`${clickedIndex}`] = !isMarked;
+                            await setDoc(bingoDocRef, { markedCells: updateObject }, { merge: true });
+                            console.log("Stan pola zaktualizowany w Firestore.");
+                            checkWin(); 
+
+                        } catch (e) {
+                            console.error("Błąd podczas aktualizacji Firestore: ", e);
+                            currentMarkedState[clickedIndex] = isMarked; 
+                            cell.classList.toggle('marked'); 
                         }
-                    }
-
-                    if (i === 12) {
-                        cell.classList.add('free-space');
-                    } else {
-                        cell.dataset.index = i;
-                        cell.addEventListener('click', async () => {
-                            const clickedIndex = parseInt(cell.dataset.index);
-                            const isMarked = !!currentMarkedState[clickedIndex];
-                            
-                            currentMarkedState[clickedIndex] = !isMarked;
-
-                            try {
-                                await setDoc(bingoDocRef, { markedCells: currentMarkedState }, { merge: true });
-                                console.log("Stan pola zaktualizowany w Firestore.");
-                                checkWin();
-                            } catch (e) {
-                                console.error("Błąd podczas aktualizacji Firestore: ", e);
-                            }
-                        });
-                    }
-
+                    });
                     bingoGrid.appendChild(cell);
-                    cells.push(cell);
-                }
+                });
                 checkWin();
             }
 
+            // Nasłuchuj na zmiany w dokumencie z zadaniami
             onSnapshot(bingoItemsDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data && Array.isArray(data.items)) {
-                        bingoItems = data.items.map(item => {
+                        const allItems = data.items.map(item => {
                             if (typeof item === 'string') {
                                 return { text: item, altText: null };
                             }
                             return { text: item.text || '', altText: item.altText || null };
                         });
-                        console.log("Zadania bingo pobrane z Firestore:", bingoItems);
                         
-                        // Po pobraniu zadań, nasłuchujemy na stan planszy
-                        onSnapshot(bingoDocRef, (docSnap) => {
-                            if (docSnap.exists()) {
-                                const data = docSnap.data();
-                                if (data && data.markedCells) {
-                                    currentMarkedState = data.markedCells;
-                                    
-                                    cells.forEach((cell, index) => {
-                                        if (index === 12) {
-                                            cell.classList.add('marked');
-                                            return;
-                                        }
-                                        if (currentMarkedState[index]) {
-                                            cell.classList.add('marked');
-                                        } else {
-                                            cell.classList.remove('marked');
-                                        }
-                                    });
-                                    console.log("Plansza zaktualizowana na podstawie Firestore.");
-                                    checkWin();
-                                } else {
-                                     // Tworzymy planszę, jeśli dokument dla grupy nie ma danych
-                                    console.log("Dokument dla tej grupy nie istnieje lub jest pusty, tworzę nową planszę.");
-                                    createBingoBoard(bingoItems);
-                                    setDoc(bingoDocRef, { markedCells: { '12': true } });
-                                }
-                            } else {
-                                console.log("Dokument dla tej grupy nie istnieje, tworzę początkowy stan.");
-                                createBingoBoard(bingoItems);
-                                setDoc(bingoDocRef, { markedCells: { '12': true } });
-                            }
-                        }, (error) => {
-                            console.error("Błąd nasłuchiwania na planszę: ", error);
-                        });
+                        // Losuj 25 zadań z pobranej listy
+                        bingoItems = shuffleArray(allItems).slice(0, 25);
+                        console.log("Zadania bingo wylosowane z Firestore:", bingoItems);
+
+                        // Po wylosowaniu, odśwież planszę
+                        createBingoBoard(currentMarkedState);
                     } else {
-                        bingoItems = [];
                         console.log("Dokument bingoSettings/items istnieje, ale nie zawiera poprawnej tablicy zadań.");
+                        bingoItems = [];
                     }
                 } else {
-                    bingoItems = [];
-                    bingoGrid.innerHTML = '<p style="color:red; text-align:center;">Brak zadań bingo w bazie danych. Skontaktuj się z administratorem.</p>';
                     console.log("Dokument bingoSettings/items nie istnieje.");
+                    bingoItems = [];
+                }
+            });
+
+            // Nasłuchuj na zmiany na planszy (oznaczone pola)
+            onSnapshot(bingoDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data && data.markedCells) {
+                        const fetchedMarkedState = new Array(25).fill(false);
+                        for (const key in data.markedCells) {
+                            if (Object.prototype.hasOwnProperty.call(data.markedCells, key)) {
+                                fetchedMarkedState[parseInt(key)] = data.markedCells[key];
+                            }
+                        }
+                        currentMarkedState = fetchedMarkedState; 
+                        
+                        // Po pobraniu stanu planszy, zaktualizuj wizualnie pola
+                        const cells = document.querySelectorAll('.bingo-cell');
+                        cells.forEach((cell, index) => {
+                            if (currentMarkedState[index]) {
+                                cell.classList.add('marked');
+                            } else {
+                                cell.classList.remove('marked');
+                            }
+                        });
+                        console.log("Plansza zaktualizowana na podstawie Firestore.");
+                        checkWin();
+                    }
+                } else {
+                    console.log("Dokument dla tej grupy nie istnieje, tworzę początkowy stan.");
+                    setDoc(bingoDocRef, { markedCells: {} });
                 }
             }, (error) => {
-                console.error("Błąd nasłuchiwania na bingoSettings/items: ", error);
+                console.error("Błąd nasłuchiwania Firestore: ", error);
             });
 
             resetButton.addEventListener('click', async () => {
-                const markedCells = { '12': true };
+                const emptyState = {};
+                for (let i = 0; i < 25; i++) {
+                    emptyState[i] = false;
+                }
+
                 try {
-                    await setDoc(bingoDocRef, { markedCells: markedCells });
+                    await setDoc(bingoDocRef, { markedCells: emptyState }); 
                     console.log("Plansza zresetowana w Firestore.");
                 } catch (e) {
                     console.error("Błąd podczas resetowania planszy: ", e);

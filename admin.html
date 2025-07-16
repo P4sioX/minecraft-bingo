@@ -256,7 +256,7 @@
             background-color: #c82333;
         }
 
-        .reset-group-section, .create-group-section {
+        .reset-group-section {
             background-color: rgba(34, 34, 34, 0.9);
             padding: 20px;
             border-radius: 8px;
@@ -271,7 +271,7 @@
             margin-top: 20px;
         }
 
-        .reset-group-section input[type="text"], .create-group-section input[type="text"] {
+        .reset-group-section input[type="text"] {
             width: calc(100% - 20px);
             padding: 10px;
             border: 1px solid #555;
@@ -296,31 +296,15 @@
             background-color: #e0a800;
         }
 
-        .create-group-section button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-        .create-group-section button:hover {
-            background-color: #45a049;
-        }
-
         @media (max-width: 768px) {
-            .admin-controls, .reset-group-section, .create-group-section {
+            .admin-controls, .reset-group-section {
                 padding: 15px;
                 gap: 10px;
             }
             .admin-controls input[type="text"],
             .admin-controls button,
             .reset-group-section input[type="text"],
-            .reset-group-section button,
-            .create-group-section input[type="text"],
-            .create-group-section button {
+            .reset-group-section button {
                 font-size: 0.9em;
                 padding: 8px 15px;
             }
@@ -390,16 +374,6 @@
             </div>
         </div>
 
-        <div id="createGroupSection" class="create-group-section">
-            <h2>Utwórz nową planszę dla grupy</h2>
-            <label for="newGroupName">Nazwa nowej grupy:</label>
-            <input type="text" id="newGroupName" placeholder="np. 'grupa_1'">
-            <button id="createGroupBtn">Utwórz planszę</button>
-            <p style="font-size: 0.8em; color: #aaa; text-align: center; margin-top: 10px;">
-                Tworzy pustą planszę dla nowej grupy.
-            </p>
-        </div>
-
         <div id="resetGroupSection" class="reset-group-section">
             <h2>Resetuj planszę dla grupy</h2>
             <label for="resetGroupName">Nazwa grupy do zresetowania:</label>
@@ -453,16 +427,13 @@
             const loginFormContainer = document.getElementById('loginFormContainer');
             const closeLoginFormBtn = document.getElementById('closeLoginFormBtn');
             const adminEmailInput = document.getElementById('adminEmail');
-            const adminPasswordInput = document = document.getElementById('adminPassword');
+            const adminPasswordInput = document.getElementById('adminPassword');
             const signInBtn = document.getElementById('signInBtn');
             const loginError = document.getElementById('loginError');
             const overlay = document.getElementById('overlay');
             const resetGroupSection = document.getElementById('resetGroupSection');
             const resetGroupNameInput = document.getElementById('resetGroupName');
             const resetGroupBtn = document.getElementById('resetGroupBtn');
-            const createGroupSection = document.getElementById('createGroupSection');
-            const newGroupNameInput = document.getElementById('newGroupName');
-            const createGroupBtn = document.getElementById('createGroupBtn');
 
             function renderAdminItemsList() {
                 currentItemsList.innerHTML = '';
@@ -528,10 +499,13 @@
             });
 
             updateItemsBtn.addEventListener('click', async () => {
-                 if (bingoItems.length < 24) {
-                    alert(`Musisz mieć co najmniej 24 zadania, aby plansza działała poprawnie. Obecnie masz ${bingoItems.length}.`);
-                    return; 
-                 }
+                if (bingoItems.length !== MAX_BINGO_ITEMS) {
+                    const confirmUpdate = confirm(`Masz ${bingoItems.length} zadań. Plansza bingo wymaga ${MAX_BINGO_ITEMS} zadań. Czy na pewno chcesz zapisać?`);
+                    if (!confirmUpdate) {
+                        return;
+                    }
+                }
+
                 try {
                     await setDoc(bingoItemsDocRef, { items: bingoItems });
                     console.log("Zadania bingo zaktualizowane w Firestore.");
@@ -539,25 +513,6 @@
                 } catch (e) {
                     console.error("Błąd podczas aktualizacji zadań: ", e);
                     alert("Wystąpił błąd podczas zapisywania zmian. Upewnij się, że jesteś zalogowany jako administrator.");
-                }
-            });
-
-            createGroupBtn.addEventListener('click', async () => {
-                const newGroupName = newGroupNameInput.value.trim();
-                if (!newGroupName) {
-                    alert("Proszę podać nazwę nowej grupy.");
-                    return;
-                }
-
-                const newGroupDocRef = doc(db, 'bingoBoards', newGroupName);
-                try {
-                    await setDoc(newGroupDocRef, { markedCells: {} });
-                    console.log(`Plansza dla nowej grupy "${newGroupName}" została utworzona w Firestore.`);
-                    alert(`Plansza dla grupy "${newGroupName}" została utworzona!`);
-                    newGroupNameInput.value = '';
-                } catch (e) {
-                    console.error("Błąd podczas tworzenia nowej planszy: ", e);
-                    alert("Wystąpił błąd podczas tworzenia planszy. Upewnij się, że masz uprawnienia.");
                 }
             });
 
@@ -591,14 +546,12 @@
                     logoutBtn.style.display = 'inline-block';
                     adminControls.style.display = 'flex'; 
                     resetGroupSection.style.display = 'flex'; 
-                    createGroupSection.style.display = 'flex';
                 } else {
                     loginStatusSpan.textContent = 'Niezalogowany';
                     loginBtn.style.display = 'inline-block';
                     logoutBtn.style.display = 'none';
                     adminControls.style.display = 'none'; 
                     resetGroupSection.style.display = 'none'; 
-                    createGroupSection.style.display = 'none';
                 }
                 hideLoginForm(); 
             });
