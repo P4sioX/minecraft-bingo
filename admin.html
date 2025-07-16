@@ -384,6 +384,7 @@
                     <ol></ol>
                 </div>
                 <button id="updateItemsBtn">Zapisz zadania</button>
+                <button id="downloadJsonBtn" style="background-color: #33a7b7; margin-top: 10px;">Pobierz zadania jako JSON</button>
                 <p style="font-size: 0.8em; color: #aaa; text-align: center; margin-top: 10px;">
                     Po zmianie zadań, kliknij "Zapisz zadania".
                 </p>
@@ -463,6 +464,7 @@
             const createGroupSection = document.getElementById('createGroupSection');
             const newGroupNameInput = document.getElementById('newGroupName');
             const createGroupBtn = document.getElementById('createGroupBtn');
+            const downloadJsonBtn = document.getElementById('downloadJsonBtn');
 
             function renderAdminItemsList() {
                 currentItemsList.innerHTML = '';
@@ -540,6 +542,23 @@
                     console.error("Błąd podczas aktualizacji zadań: ", e);
                     alert("Wystąpił błąd podczas zapisywania zmian. Upewnij się, że jesteś zalogowany jako administrator.");
                 }
+            });
+
+            downloadJsonBtn.addEventListener('click', () => {
+                if (bingoItems.length === 0) {
+                    alert("Brak zadań do pobrania.");
+                    return;
+                }
+                const dataStr = JSON.stringify(bingoItems, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'minecraft_bingo_tasks.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             });
 
             createGroupBtn.addEventListener('click', async () => {
