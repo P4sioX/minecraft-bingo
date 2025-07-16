@@ -292,7 +292,6 @@
                         const isMarked = !!currentMarkedState[clickedIndex];
                         
                         currentMarkedState[clickedIndex] = !isMarked;
-                        updateCellsVisuals();
 
                         try {
                             await setDoc(bingoDocRef, { markedCells: currentMarkedState });
