@@ -453,7 +453,7 @@
             const loginFormContainer = document.getElementById('loginFormContainer');
             const closeLoginFormBtn = document.getElementById('closeLoginFormBtn');
             const adminEmailInput = document.getElementById('adminEmail');
-            const adminPasswordInput = document.getElementById('adminPassword');
+            const adminPasswordInput = document = document.getElementById('adminPassword');
             const signInBtn = document.getElementById('signInBtn');
             const loginError = document.getElementById('loginError');
             const overlay = document.getElementById('overlay');
@@ -528,13 +528,10 @@
             });
 
             updateItemsBtn.addEventListener('click', async () => {
-                if (bingoItems.length !== MAX_BINGO_ITEMS) {
-                    const confirmUpdate = confirm(`Masz ${bingoItems.length} zadań. Plansza bingo wymaga ${MAX_BINGO_ITEMS} zadań. Czy na pewno chcesz zapisać?`);
-                    if (!confirmUpdate) {
-                        return;
-                    }
-                }
-
+                 if (bingoItems.length < 24) {
+                    alert(`Musisz mieć co najmniej 24 zadania, aby plansza działała poprawnie. Obecnie masz ${bingoItems.length}.`);
+                    return; 
+                 }
                 try {
                     await setDoc(bingoItemsDocRef, { items: bingoItems });
                     console.log("Zadania bingo zaktualizowane w Firestore.");
