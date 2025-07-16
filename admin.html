@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Bingo - Panel Admina</title>
+    <style>
+        body {
+            font-family: 'Minecraft', sans-serif; /* Pamiętaj, aby mieć tę czcionkę zdefiniowaną lub usunąć */
+            background-color: #333;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('tlo1.png'); /* Upewnij się, że ten plik istnieje w katalogu */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        header {
+            background-color: rgba(34, 34, 34, 0.9);
+            padding: 15px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #fff;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        #loginStatus {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #loginBtn, #logoutBtn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        #loginBtn:hover, #logoutBtn:hover {
+            background-color: #0056b3;
+        }
+
+        #loginFormContainer {
+            background-color: rgba(34, 34, 34, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            display: none; /* Domyślnie ukryte */
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        #loginFormContainer label {
+            display: block;
+            margin-bottom: 5px;
+            color: #eee;
+            font-weight: bold;
+        }
+
+        #loginFormContainer input[type="email"],
+        #loginFormContainer input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #555;
+            background-color: #2a2a2a;
+            color: #eee;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        #loginFormContainer button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+
+        #loginFormContainer button:hover {
+            background-color: #45a049;
+        }
+
+        #loginFormContainer .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #bbb;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+        #loginFormContainer .close-btn:hover {
+            color: #fff;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Zmienione na flex-start, aby formularz był na górze */
+            align-items: center;
+            width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .admin-controls {
+            background-color: rgba(34, 34, 34, 0.9);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 700px; /* Dopasuj do szerokości planszy */
+            box-sizing: border-box;
+            display: none; /* Domyślnie ukryte */
+            flex-direction: column; /* Elementy w kolumnie */
+            gap: 15px; /* Odstęp między elementami */
+            align-items: center; /* Centruj zawartość formularza */
+        }
+
+        .admin-controls label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #fff;
+            text-align: left;
+            width: 100%; /* Rozciągnij na całą szerokość */
+        }
+
+        .admin-controls input[type="text"] {
+            width: calc(100% - 20px); /* Szerokość z paddingiem */
+            padding: 10px;
+            border: 1px solid #555;
+            background-color: #2a2a2a;
+            color: #eee;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box; /* Ważne dla paddingu i szerokości */
+        }
+
+        .admin-controls button {
+            background-color: #337ab7; /* Kolor przycisku administratora */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            margin-top: 10px; /* Odstęp po inputach */
+        }
+
+        .admin-controls button:hover {
+            background-color: #286090;
+        }
+
+        #currentItemsList {
+            width: calc(100% - 20px);
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            background-color: #2a2a2a;
+            color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            box-sizing: border-box;
+            word-wrap: break-word; /* Dodałem to, aby długi tekst się łamał */
+        }
+
+        #currentItemsList ol {
+            list-style-type: decimal; /* Numeryczna lista */
+            padding-left: 20px;
+            margin: 0;
+        }
+        #currentItemsList li {
+            padding: 5px 0;
+            border-bottom: 1px dashed #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #currentItemsList li:last-child {
+            border-bottom: none;
+        }
+        .remove-item-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0; /* Zapobiega zmniejszaniu się przycisku */
+        }
+        .remove-item-btn:hover {
+            background-color: #c82333;
+        }
+
+        .reset-group-section {
+            background-color: rgba(34, 34, 34, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+            display: none; /* Domyślnie ukryte, pokażemy adminowi */
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .reset-group-section input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #555;
+            background-color: #2a2a2a;
+            color: #eee;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .reset-group-section button {
+            background-color: #ffc107; /* Ostrzegawczy żółty */
+            color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .reset-group-section button:hover {
+            background-color: #e0a800;
+        }
+
+        /* Responsywność */
+        @media (max-width: 768px) {
+            .admin-controls, .reset-group-section {
+                padding: 15px;
+                gap: 10px;
+            }
+            .admin-controls input[type="text"],
+            .admin-controls button,
+            .reset-group-section input[type="text"],
+            .reset-group-section button {
+                font-size: 0.9em;
+                padding: 8px 15px;
+            }
+            #currentItemsList {
+                font-size: 0.8em;
+                max-height: 150px;
+            }
+            .auth-controls {
+                top: 5px;
+                right: 5px;
+                flex-direction: column;
+                gap: 5px;
+                align-items: flex-end;
+            }
+            #loginBtn, #logoutBtn {
+                padding: 5px 10px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MINECRAFT BINGO - PANEL ADMINA</h1>
+        <div class="auth-controls">
+            <span id="loginStatus">Niezalogowany</span>
+            <button id="loginBtn">Logowanie</button>
+            <button id="logoutBtn" style="display: none;">Wyloguj</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="loginFormContainer">
+            <button class="close-btn" id="closeLoginFormBtn">&times;</button>
+            <h2>Logowanie Administratora</h2>
+            <label for="adminEmail">Email:</label>
+            <input type="email" id="adminEmail" placeholder="admin@example.com">
+            <label for="adminPassword">Hasło:</label>
+            <input type="password" id="adminPassword" placeholder="Twoje hasło">
+            <button id="signInBtn">Zaloguj</button>
+            <p id="loginError" style="color: red; margin-top: 10px; text-align: center; display: none;"></p>
+        </div>
+
+        <div id="overlay"></div>
+
+        <div id="adminControls" class="admin-controls">
+            <h2>Zarządzaj zadaniami bingo (max 25)</h2>
+            <div style="width: 100%;">
+                <label for="newItemText">Główne zadanie:</label>
+                <input type="text" id="newItemText" placeholder="Wpisz główne zadanie bingo">
+
+                <label for="newAltText" style="margin-top: 10px;">Alternatywny tekst (tooltip/podpowiedź):</label>
+                <input type="text" id="newAltText" placeholder="Wpisz tekst do wyświetlenia po najechaniu (opcjonalnie)">
+                
+                <button id="addItemBtn">Dodaj zadanie</button>
+            </div>
+            
+            <div style="width: 100%;">
+                <h3>Aktualne zadania (<span id="itemCount">0</span>/25):</h3>
+                <div id="currentItemsList">
+                    <ol></ol>
+                </div>
+                <button id="updateItemsBtn">Zapisz zadania</button>
+                <p style="font-size: 0.8em; color: #aaa; text-align: center; margin-top: 10px;">
+                    Po zmianie zadań, kliknij "Zapisz zadania".
+                </p>
+            </div>
+        </div>
+
+        <div id="resetGroupSection" class="reset-group-section">
+            <h2>Resetuj planszę dla grupy</h2>
+            <label for="resetGroupName">Nazwa grupy do zresetowania:</label>
+            <input type="text" id="resetGroupName" placeholder="np. 'moja_grupa'">
+            <button id="resetGroupBtn">Zresetuj planszę grupy</button>
+            <p style="font-size: 0.8em; color: #aaa; text-align: center; margin-top: 10px;">
+                Resetuje wszystkie pola na planszy dla podanej grupy. To trwałe!
+            </p>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>Seed: Niestandardowy | Poziom Trudności: Kontrolowany | Wersja: Twoja Edycja</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
+
+        // --------------- TUTAJ WKLEJ SWOJĄ firebaseConfig Z KONSOLI FIREBASE ---------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPkoHxtq9PlsMpG1T1TKbH5Wqr54UWse8",
+            authDomain: "p4si0x.firebaseapp.com",
+            projectId: "p4si0x",
+            storageBucket: "p4si0x.firebasestorage.app",
+            messagingSenderId: "1098386195548",
+            appId: "1:1098386195548:web:b3c552c82fce01679b9299",
+            measurementId: "G-8Q9R8YJV1N"
+        };
+        // ----------------------------------------------------------------------------------
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Referencja do dokumentu z globalnymi ustawieniami/elementami bingo (lista zadań)
+        const bingoItemsDocRef = doc(db, 'bingoSettings', 'items');
+
+        let bingoItems = [];
+        const MAX_BINGO_ITEMS = 25;
+
+        // ZMIENNA DLA UID ADMINISTRATORA (ZAMIEŃ NA SWÓJ UID Z KONSOLI FIREBASE AUTH)
+        const ADMIN_UID = 'twój_uid_administratora_tutaj'; // <-- BARDZO WAŻNE: ZMIEŃ TO NA SWÓJ RZECZYWISTY UID!
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementy formularza administracyjnego
+            const adminControls = document.getElementById('adminControls');
+            const newItemText = document.getElementById('newItemText');
+            const newAltText = document.getElementById('newAltText');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const currentItemsList = document.getElementById('currentItemsList').querySelector('ol');
+            const itemCountSpan = document.getElementById('itemCount');
+            const updateItemsBtn = document.getElementById('updateItemsBtn'); // Zmieniona nazwa przycisku
+
+            // Elementy formularza logowania
+            const loginStatusSpan = document.getElementById('loginStatus');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const loginFormContainer = document.getElementById('loginFormContainer');
+            const closeLoginFormBtn = document.getElementById('closeLoginFormBtn');
+            const adminEmailInput = document.getElementById('adminEmail');
+            const adminPasswordInput = document.getElementById('adminPassword');
+            const signInBtn = document.getElementById('signInBtn');
+            const loginError = document.getElementById('loginError');
+            const overlay = document.getElementById('overlay');
+
+            // Elementy resetowania grupy
+            const resetGroupSection = document.getElementById('resetGroupSection');
+            const resetGroupNameInput = document.getElementById('resetGroupName');
+            const resetGroupBtn = document.getElementById('resetGroupBtn');
+
+
+            // Funkcja do renderowania listy zadań w formularzu admina
+            function renderAdminItemsList() {
+                currentItemsList.innerHTML = '';
+                itemCountSpan.textContent = bingoItems.length;
+
+                bingoItems.forEach((itemObject, index) => {
+                    const listItem = document.createElement('li');
+                    const altTextDisplay = itemObject.altText ? `<span style="font-size:0.8em; color: #888;"> (${itemObject.altText})</span>` : '';
+                    listItem.innerHTML = `${itemObject.text}${altTextDisplay} <button class="remove-item-btn" data-index="${index}">Usuń</button>`;
+                    currentItemsList.appendChild(listItem);
+                });
+
+                document.querySelectorAll('.remove-item-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const indexToRemove = parseInt(e.target.dataset.index);
+                        if (indexToRemove >= 0 && indexToRemove < bingoItems.length) {
+                            bingoItems.splice(indexToRemove, 1);
+                            renderAdminItemsList();
+                        }
+                    });
+                });
+            }
+
+            // Nasłuchiwanie na zmiany w dokumencie bingoSettings/items (lista zadań)
+            onSnapshot(bingoItemsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data && Array.isArray(data.items)) {
+                        bingoItems = data.items.map(item => {
+                            if (typeof item === 'string') {
+                                return { text: item, altText: null };
+                            }
+                            return { text: item.text || '', altText: item.altText || null };
+                        });
+                        console.log("Zadania bingo pobrane z Firestore:", bingoItems);
+                    } else {
+                        bingoItems = [];
+                        console.log("Dokument bingoSettings/items istnieje, ale nie zawiera poprawnej tablicy zadań.");
+                    }
+                } else {
+                    bingoItems = [];
+                    console.log("Dokument bingoSettings/items nie istnieje, tworzę.");
+                    // Możesz odkomentować to, jeśli chcesz, aby dokument był zawsze tworzony, nawet jeśli nikt nie kliknie "Zapisz zadania"
+                    // setDoc(bingoItemsDocRef, { items: [] });
+                }
+                renderAdminItemsList();
+            }, (error) => {
+                console.error("Błąd nasłuchiwania na bingoSettings/items: ", error);
+            });
+
+            // Dodawanie nowego zadania do lokalnej tablicy
+            addItemBtn.addEventListener('click', () => {
+                const mainText = newItemText.value.trim();
+                const altText = newAltText.value.trim();
+
+                if (mainText && bingoItems.length < MAX_BINGO_ITEMS) {
+                    bingoItems.push({ text: mainText, altText: altText || null });
+                    newItemText.value = '';
+                    newAltText.value = '';
+                    renderAdminItemsList();
+                } else if (!mainText) {
+                    alert("Główne zadanie nie może być puste!");
+                }
+                else if (bingoItems.length >= MAX_BINGO_ITEMS) {
+                    alert(`Możesz mieć maksymalnie ${MAX_BINGO_ITEMS} zadań.`);
+                }
+            });
+
+            // Zapisywanie zmian w zadaniach do Firestore
+            updateItemsBtn.addEventListener('click', async () => {
+                if (bingoItems.length !== MAX_BINGO_ITEMS) {
+                    const confirmUpdate = confirm(`Masz ${bingoItems.length} zadań. Plansza bingo wymaga ${MAX_BINGO_ITEMS} zadań. Czy na pewno chcesz zapisać?`);
+                    if (!confirmUpdate) {
+                        return;
+                    }
+                }
+
+                try {
+                    await setDoc(bingoItemsDocRef, { items: bingoItems });
+                    console.log("Zadania bingo zaktualizowane w Firestore.");
+                    alert("Zadania zaktualizowane pomyślnie!");
+                } catch (e) {
+                    console.error("Błąd podczas aktualizacji zadań: ", e);
+                    alert("Wystąpił błąd podczas zapisywania zmian. Upewnij się, że jesteś zalogowany jako administrator.");
+                }
+            });
+
+            // Obsługa resetowania planszy dla konkretnej grupy
+            resetGroupBtn.addEventListener('click', async () => {
+                const groupToReset = resetGroupNameInput.value.trim();
+                if (!groupToReset) {
+                    alert("Proszę podać nazwę grupy do zresetowania.");
+                    return;
+                }
+
+                const confirmReset = confirm(`Czy na pewno chcesz zresetować planszę dla grupy: "${groupToReset}"? To trwałe!`);
+                if (!confirmReset) return;
+
+                const bingoDocRefToReset = doc(db, 'bingoBoards', groupToReset);
+                try {
+                    await setDoc(bingoDocRefToReset, { markedCells: {} });
+                    console.log(`Plansza dla grupy "${groupToReset}" zresetowana w Firestore.`);
+                    alert(`Plansza dla grupy "${groupToReset}" została zresetowana!`);
+                    resetGroupNameInput.value = '';
+                } catch (e) {
+                    console.error("Błąd podczas resetowania planszy grupy: ", e);
+                    alert("Wystąpił błąd podczas resetowania planszy. Upewnij się, że masz uprawnienia.");
+                }
+            });
+
+
+            // --- LOGIKA UWIERZYTELNIANIA ---
+
+            // Monitoruj stan uwierzytelnienia
+            onAuthStateChanged(auth, (user) => {
+                if (user && user.uid === ADMIN_UID) {
+                    loginStatusSpan.textContent = `Zalogowany jako admin: ${user.email}`;
+                    loginBtn.style.display = 'none';
+                    logoutBtn.style.display = 'inline-block';
+                    adminControls.style.display = 'flex'; // Pokaż formularz admina
+                    resetGroupSection.style.display = 'flex'; // Pokaż sekcję resetowania
+                } else {
+                    loginStatusSpan.textContent = 'Niezalogowany';
+                    loginBtn.style.display = 'inline-block';
+                    logoutBtn.style.display = 'none';
+                    adminControls.style.display = 'none'; // Ukryj formularz admina
+                    resetGroupSection.style.display = 'none'; // Ukryj sekcję resetowania
+                }
+                hideLoginForm(); // Zawsze ukryj formularz logowania po zmianie stanu
+            });
+
+            // Pokaż formularz logowania
+            loginBtn.addEventListener('click', () => {
+                loginFormContainer.style.display = 'flex';
+                overlay.style.display = 'block';
+                loginError.style.display = 'none'; // Ukryj błąd przy ponownym otwarciu
+            });
+
+            // Zamknij formularz logowania
+            closeLoginFormBtn.addEventListener('click', hideLoginForm);
+            overlay.addEventListener('click', hideLoginForm); // Zamknij po kliknięciu poza formularzem
+
+            function hideLoginForm() {
+                loginFormContainer.style.display = 'none';
+                overlay.style.display = 'none';
+                loginError.style.display = 'none';
+                adminEmailInput.value = '';
+                adminPasswordInput.value = '';
+            }
+
+            // Obsługa logowania
+            signInBtn.addEventListener('click', async () => {
+                const email = adminEmailInput.value;
+                const password = adminPasswordInput.value;
+
+                loginError.style.display = 'none'; // Wyczyść poprzedni błąd
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    console.log("Użytkownik zalogowany!");
+                    // onAuthStateChanged automatycznie zaktualizuje UI
+                } catch (error) {
+                    console.error("Błąd logowania:", error.code, error.message);
+                    loginError.textContent = "Błąd logowania: " + (error.code === 'auth/invalid-credential' ? 'Nieprawidłowy email lub hasło.' : error.message);
+                    loginError.style.display = 'block';
+                }
+            });
+
+            // Obsługa wylogowania
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    console.log("Użytkownik wylogowany!");
+                    // onAuthStateChanged automatycznie zaktualizuje UI
+                } catch (error) {
+                    console.error("Błąd wylogowania:", error);
+                    alert("Wystąpił błąd podczas wylogowania.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
