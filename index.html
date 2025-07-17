@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Moje Minecraft Bingo</title>
     <style>
+        /* Globalne style dla responsywności */
+        html {
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
         body {
             font-family: 'Minecraft', sans-serif;
             background-color: #333;
@@ -168,7 +176,14 @@
             transform: translateY(-2px);
         }
 
+        /* Nowe media queries dla telefonów */
         @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.6em;
+            }
+            .bingo-cell {
+                font-size: 0.8em;
+            }
             .win-message {
                 font-size: 1.8em;
                 padding: 20px;
@@ -178,8 +193,14 @@
                 padding: 10px 20px;
             }
         }
-
+        
         @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.2em;
+            }
+            .bingo-cell {
+                font-size: 0.7em;
+            }
             .win-message {
                 font-size: 1.4em;
                 padding: 15px;
@@ -199,6 +220,11 @@
 
     <main>
         <div class="bingo-grid" id="bingoGrid">
+        </div>
+        <div style="margin-top: 20px; text-align: center;">
+            <p>Lub wgraj zadania ręcznie:</p>
+            <input type="file" id="uploadJsonInput" accept=".json" style="display: none;">
+            <button onclick="document.getElementById('uploadJsonInput').click();">Wgraj zadania z pliku JSON</button>
         </div>
     </main>
 
@@ -318,7 +344,6 @@
                 checkWin();
             }
 
-            // Nasłuchiwanie na dokument z zadaniami BINGO
             onSnapshot(bingoItemsDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -331,18 +356,15 @@
                         });
                         console.log("Zadania bingo pobrane z Firestore.");
 
-                        // Nasłuchiwanie na planszę danej grupy
                         onSnapshot(bingoDocRef, async (docSnap) => {
                             if (docSnap.exists()) {
                                 const data = docSnap.data();
                                 
-                                // Jeśli plansza ma zapisany układ, użyj go
                                 if (data && data.boardLayout) {
                                     createBingoBoard(data.boardLayout);
                                     currentMarkedState = data.markedCells || {};
                                     updateCellsVisuals();
                                 } else {
-                                    // Jeśli układu nie ma, to pierwsza wizyta. Generuj nowy.
                                     console.log("Dokument planszy nie ma układu, generuję nowy.");
                                     if (bingoItems.length >= 25) {
                                         const shuffledItems = [...bingoItems].sort(() => 0.5 - Math.random());
