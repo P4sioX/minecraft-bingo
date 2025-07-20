@@ -71,7 +71,7 @@
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
             gap: 5px;
-            width: 100%;
+            width: 95%;
             max-width: 700px;
             aspect-ratio: 1 / 1;
             border: 4px solid #555;
@@ -88,7 +88,7 @@
             align-items: center;
             padding: 8px;
             text-align: center;
-            font-size: 0.9em;
+            font-size: clamp(0.7em, 2.5vw, 1em);
             font-weight: bold;
             color: #ddd;
             cursor: pointer;
@@ -175,7 +175,6 @@
             transform: translateY(-2px);
         }
 
-        /* Nowe media queries dla telefonów */
         @media (max-width: 768px) {
             header h1 {
                 font-size: 1.6em;
@@ -195,11 +194,16 @@
         
         @media (max-width: 480px) {
             header h1 {
-                font-size: 1.2em;
+                font-size: 1.5em;
             }
             .bingo-cell {
                 font-size: 0.7em;
+				padding: 5px; 
+				line-height: 1;
             }
+			.bingo-grid {
+			width: 98%; 
+			}
             .win-message {
                 font-size: 1.4em;
                 padding: 15px;
@@ -209,6 +213,11 @@
                 padding: 8px 15px;
             }
         }
+		@media (max-width: 380px) {
+			.bingo-cell {
+			font-size: 0.6em; 
+    }
+}
     </style>
 </head>
 <body>
