@@ -372,7 +372,7 @@
                                 } else {
                                     console.log("Dokument planszy nie ma układu, generuję nowy.");
                                     if (bingoItems.length >= 25) {
-                                        const staticItems = bingoItems.slice(0, 25); 
+                                        const shuffledItems = [...bingoItems].sort(() => 0.5 - Math.random());
                                         await setDoc(bingoDocRef, { 
                                             markedCells: {}, 
                                             boardLayout: shuffledItems 
@@ -387,9 +387,9 @@
                                 if (bingoItems.length >= 25) {
                                     const shuffledItems = [...bingoItems].sort(() => 0.5 - Math.random());
                                     await setDoc(bingoDocRef, {
-										markedCells: {},
-										boardLayout: staticItems
-									});
+                                        markedCells: {},
+                                        boardLayout: shuffledItems
+                                    });
                                 }
                             }
                         }, (error) => {
